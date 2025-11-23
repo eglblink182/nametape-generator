@@ -1,0 +1,91 @@
+@font-face {
+  font-family: "CaptainTallShip";
+  src: url("assets/fonts/CaptainTallShip.otf") format("truetype");
+  font-display: swap;
+}
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #111827;
+  color: #e5e7eb;
+}
+
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  padding: 2rem;
+}
+
+.controls,
+.preview {
+  background: #1f2933;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.controls {
+  flex: 1 1 260px;
+  max-width: 320px;
+}
+
+.preview {
+  flex: 2 1 500px;
+}
+
+h1, h2 {
+  margin-top: 0;
+}
+
+label {
+  display: block;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+input,
+select {
+  width: 100%;
+  margin-top: 0.25rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: 0.25rem;
+  border: 1px solid #4b5563;
+  background: #111827;
+  color: #e5e7eb;
+}
+
+button {
+  margin-right: 0.5rem;
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.9rem;
+  border: none;
+  border-radius: 0.35rem;
+  cursor: pointer;
+  background: #ef4444;
+  color: #f9fafb;
+  font-weight: 600;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#previewCanvas {
+  width: 900px;      /* match the actual canvas width */
+  height: 263px;     /* match the actual canvas height */
+  border: 2px solid #4b5563;
+  background: #000;
+  display: block;
+
+  /* Optional: try crisper scaling behavior on some browsers */
+  image-rendering: crisp-edges;
+  /* or: image-rendering: pixelated; */
+}
+
+.note {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-top: 0.5rem;
+}

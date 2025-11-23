@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Nametape Generator</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="container">
+    <section class="controls">
+      <h1>Nametape Generator</h1>
+
+      <label>
+        Name
+        <input id="nameInput" type="text" placeholder="Name" />
+      </label>
+
+      <label>
+        Rank
+        <select id="rankSelect"></select>
+      </label>
+
+      <label>
+        Skill Level
+        <select id="skillSelect"></select>
+      </label>
+
+      <label>
+        Shop
+        <select id="shopSelect"></select>
+      </label>
+
+      <label>
+        Duty Title
+        <select id="dutySelect"></select>
+      </label>
+
+      <button id="generateBtn" type="button">Generate Nametape</button>
+      <button id="downloadBtn" type="button">Download PNG</button>
+    </section>
+
+    <section class="preview">
+      <h2>Preview</h2>
+      <canvas id="previewCanvas"></canvas>
+      <p class="note">Canvas is rendered at 900×263 pixels and exported at full resolution.</p>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
