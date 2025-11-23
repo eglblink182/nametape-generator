@@ -42,21 +42,22 @@ const CONFIG = {
 
   // ---- Name Text Configuration ----
   nameText: {
+    // Base X center; Y is decided per name (caps/drops)
     centerX: 548.9,
-    centerY: 153.7,
+    centerY: 131.6, // not used directly but kept for reference
 
-    // Horizontal bounds the text must stay within
-    minX: 200,
-    maxX: 860,
+    // Horizontal bounds the text box must stay within
+    minX: 240, // left constraint
+    maxX: 860, // right constraint
 
     fontFamily: "CaptainTallShip, system-ui, sans-serif",
 
-    // Font size range – we'll clamp by both width & height
+    // Font size range – we'll clamp by width & height
     maxFontSize: 150,
     minFontSize: 40,
 
-    // Visually bold stroke
-    strokeWidthPx: 4,
+    // Stroke width (outline thickness)
+    strokeWidthPx: 14,
 
     colorsByShop: {
       APG: {
@@ -73,12 +74,9 @@ const CONFIG = {
       },
     },
 
-    // Max text height (top of caps to bottom of descenders)
-    maxTextHeight: 166, // ≈ 236.7 - 70.6
-
-    // Clip region (hard boundary so text never enters the border)
-    clipTop: 70.6,
-    clipBottom: 236.7,
+    // Vertical bounds the text box must stay within
+    clipTop: 40,
+    clipBottom: 220,
   },
 };
 
@@ -254,43 +252,64 @@ async function preloadImages() {
 // ---- TEXT DRAWING ----
 function drawNameText(name, shopKey) {
   const cfg = CONFIG.nameText;
-
   const displayName = (name || "NAME").trim();
 
-  ctx.textBaseline = "alphabetic";
-  ctx.textAlign = "center";
+  // Always center on the same point (same as ERIC/Eric)
+  const centerX = cfg.centerX;
+  const centerY = cfg.centerY;
 
-  const maxHalfWidth = Math.min(
-    cfg.centerX - cfg.minX,
-    cfg.maxX - cfg.centerX
-  );
-  const maxWidth = maxHalfWidth * 2;
-  const maxHeight = cfg.maxTextHeight;
+  // Center-center alignment
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+
+  const allowedLeft = cfg.minX;         // 240
+  const allowedRight = cfg.maxX;        // 860
+  const allowedTop = cfg.clipTop;       // 40
+  const allowedBottom = cfg.clipBottom; // 220
+
+  const allowedHeight = allowedBottom - allowedTop;
 
   let fontSize = cfg.maxFontSize;
-  let ascent = 0;
-  let descent = 0;
+  let halfW = 0;
+  let halfH = 0;
 
+  // --- Auto-size based on BOTH width & height vs bounds ---
   while (fontSize > cfg.minFontSize) {
-    ctx.font = `bold ${fontSize}px ${cfg.fontFamily}`;
+    ctx.font = `${fontSize}px ${cfg.fontFamily}`;
+
     const metrics = ctx.measureText(displayName);
 
-    const textWidth = metrics.width;
+    // Include stroke in width & height
+    const textWidth = metrics.width + cfg.strokeWidthPx * 2;
 
-    ascent =
+    const ascent =
       metrics.actualBoundingBoxAscent !== undefined
         ? metrics.actualBoundingBoxAscent
         : fontSize * 0.8;
 
-    descent =
+    const descent =
       metrics.actualBoundingBoxDescent !== undefined
         ? metrics.actualBoundingBoxDescent
         : fontSize * 0.3;
 
-    const textHeight = ascent + descent + cfg.strokeWidthPx;
+    const textHeight = ascent + descent + cfg.strokeWidthPx * 2;
 
-    const fitsWidth = textWidth <= maxWidth;
-    const fitsHeight = textHeight <= maxHeight;
+    // If the text itself is taller than the allowed vertical band, shrink
+    if (textHeight > allowedHeight) {
+      fontSize -= 1;
+      continue;
+    }
+
+    halfW = textWidth / 2;
+    halfH = textHeight / 2;
+
+    const left = centerX - halfW;
+    const right = centerX + halfW;
+    const top = centerY - halfH;
+    const bottom = centerY + halfH;
+
+    const fitsWidth = left >= allowedLeft && right <= allowedRight;
+    const fitsHeight = top >= allowedTop && bottom <= allowedBottom;
 
     if (fitsWidth && fitsHeight) {
       break;
@@ -299,32 +318,21 @@ function drawNameText(name, shopKey) {
     fontSize -= 1;
   }
 
-  ctx.font = `bold ${fontSize}px ${cfg.fontFamily}`;
+  // Lock final font
+  ctx.font = `${fontSize}px ${cfg.fontFamily}`;
 
+  // Shop-specific colors
   const colors = cfg.colorsByShop[shopKey] || cfg.colorsByShop.default;
   ctx.fillStyle = colors.fill;
   ctx.strokeStyle = colors.stroke;
   ctx.lineWidth = cfg.strokeWidthPx;
 
-  const textBoxHeight = ascent + descent;
-  const topOfBox = cfg.centerY - textBoxHeight / 2;
-  const baselineY = topOfBox + ascent;
-  const x = cfg.centerX;
+  const x = centerX;
+  const y = centerY;
 
-  ctx.save();
-  ctx.beginPath();
-  ctx.rect(
-    0,
-    cfg.clipTop,
-    CONFIG.canvas.width,
-    cfg.clipBottom - cfg.clipTop
-  );
-  ctx.clip();
-
-  ctx.strokeText(displayName, x, baselineY);
-  ctx.fillText(displayName, x, baselineY);
-
-  ctx.restore();
+  // Draw directly, no clipping
+  ctx.strokeText(displayName, x, y);
+  ctx.fillText(displayName, x, y);
 }
 
 // ---- MAIN DRAW FUNCTION: LAYER IMAGES ----
